@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: sa
+
+  app:
+    build: .
+    command: runserver 0.0.0.0:5000
+    entrypoint: python3 manage.py
+    volumes:
+      - ./src:/code
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    restart: always
+
+  generate:
+    build: .
+    command: bash -c 'mkdir src && django-admin startproject app src'
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+
+  manage:
+    build: .
+    entrypoint: python3 manage.py
+    volumes:
+      - ./src:/code
+    depends_on:
+      - db
